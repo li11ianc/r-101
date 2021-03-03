@@ -5,10 +5,174 @@ date: "3/2/2021"
 output: html_document
 ---
 
-```{r}
+```{r install-packages, message = FALSE, warning = FALSE}
+#install.packages("tidyverse")
+#install.packages("dplyr")
+#install.packages("ggplot2")
+```
+
+```{r load-packages, eval = TRUE, echo = TRUE, message = FALSE, warning = FALSE}
 library(tidyverse)
+library(dplyr)
 library(ggplot2)
+```
+
+Today we'll be using a dataset about mammalian sleep that comes built in to ggplot2. 
+
+```{r}
+msleep
+```
+
+You usually won't be working with data that's already built into R, so for practice we're going to read in the same `msleep` data as a CSV file. 
+
+```{r load-data, message=FALSE}
+mammal <- read_csv("data/mammal-sleep.csv")
 ```
 
 ### Exercise 1
 
+**What are the dimensions of `mammal()`? How many rows and columns does it have?**
+
+```{r data-dimensions}
+
+```
+
+Type `head(mammal)` in the Console window. What does this do? How about `tail(mammal)`?
+
+### Exercise 2
+
+Let's do some exploratory data analysis and look at summary statistics!
+
+You've learned the assignment operator, so it's time to introduce the piping operator `%>%`. This is used to pass the output of one line to the next, like in the example below.
+
+```{r}
+mammal %>%
+  filter(order == "Primates") %>%
+  select(name, sleep_total) %>%
+  arrange(desc(sleep_total)) %>%
+  head(5)
+```
+
+**Try this on your own -- see if you can find the mammal of class Rodentia that spends the least time awake.**
+
+R can make logical comparisons like the one in `filter()` above. Use `!=` to mean 'does not equal'. You can also use operators like `>` or `<=` to mean 'is greater than' and 'is less than or equal to'. Also `is.na()` and `!is.na()`. Remember to use `==` for equality, not `=`. Use `|` as "or" and `&` as "and" for multiple conditions. (Also `%in%`!)
+
+### Exercise 3
+
+If you want to look at the contents of one column (or vector) in the data, you can subset a dataframe like so:
+
+```{r}
+mammal$sleep_total
+```
+
+**Try finding the average total amount of sleep of mammals in the data on your own.**
+
+The `summary()` function can provide good information.
+
+```{r}
+summary(mammal)
+```
+
+Does it make sense to use the summary function on the variable `order` in our data?
+
+Reminder: Now you've made a few more edits to your R Markdown files, try committing your changes!
+
+### Exercise 4
+
+The `mutate` function allows you to create new variables. Let's create a variable with body weight in pounds instead of kilograms.
+
+```{r}
+mammal <- mammal %>%
+  mutate(bodywt_lbs = round(bodywt * 2.205, 2))
+```
+
+Now let's use `case_when()` within `mutate()` to create a variable that shows whether an animal spends more time asleep than awake.
+
+```{r}
+mammal <- mammal %>%
+  mutate(sleepy = case_when(
+    sleep_total > awake ~ TRUE,
+    sleep_total <= awake ~ FALSE
+  ))
+```
+
+**On your own, create a variable containing the number of sleep cycles the animals experience each night (hint: divide the total amount of sleep by the length of the sleep cycle). Round to one decimal place and call the new variable `num_cycles`**
+
+A syntax tip for case_when: use `TRUE ~ orig_variable_name` as a kind of "else" or "in all other cases". So we could also use the following code to create `sleepy`.
+
+```{r}
+mammal <- mammal %>%
+  mutate(sleepy = case_when(
+    sleep_total > awake ~ TRUE,
+    TRUE ~ FALSE
+  ))
+```
+
+Every value of a variable must be of the same type (i.e. character, numeric, integer, etc.) -- be careful to only create values of the same type when using `case_when()` otherwise your mutate won't work (especially with NA values). `as.numeric()`, `as.character()`, `as.integer()` are useful functions to coerce NA values (and others) to your desired variable type.
+
+### Exercise 5
+
+`group_by()` can be very helpful if you want to answer questions about specific groups or categories of observations in the data. 
+
+For example, we can use `group_by()` to determine how many animals spend more time asleep than awake.
+
+```{r}
+mammal %>%
+  group_by(sleepy) %>%
+  count()
+```
+
+We can also use `summarize()` to calculate proportions, means, or other descriptions of our grouped data.
+
+```{r message=FALSE}
+mammal %>%
+  group_by(sleepy) %>%
+  summarize(prop = n()/nrow(mammal))
+```
+
+**Use group_by() to determine the proportion of mammals in the data that are carnivores.**
+
+### Exercise 6
+
+`ggplot2` is not the only package for making plots in R, but it's a really good place to start. 
+
+You can find a great ggplot2 cheatsheet [here.](https://rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf)
+
+Let's create a plot to look at how total sleep and REM sleep are related.
+
+```{r}
+ggplot(data = mammal, mapping = aes(x = sleep_total, y = sleep_rem, color = sleepy)) +
+  geom_point() +
+  theme_light() +
+  labs(title = "REM Sleep vs. Total Sleep in Mammals",
+       subtitle = "from msleep, a dataset of the ggplot2 package",
+       x = "Total Sleep (hrs)",
+       y = "REM Sleep (hrs)", 
+       color = "More Time Asleep than Awake")
+```
+
+You may need to filter out NAs before plotting -- R does it automatically here.
+
+- data is always the first argument (can go over piping operator exception) 
+- within `aes()` (short for aesthetics), assign variables to the x/y axes and other elements of the plot 
+- use another layer to specify the kind of plot -- `geom_point()`, `geom_histogram()`, and `geom_boxplot()` are a few common examples
+- add a theme to manipulate the appearance of your plot -- `theme_light()` and `theme_classic()` are two of many options
+- use `labs()` to add labels
+- tip: use `alpha()` for transparency on crowded scatterplots
+
+Notes on `theme()`:
+You can build highly cutomized plots by formatting the non-data elements with arguments within `theme()`. See [this link](https://ggplot2.tidyverse.org/reference/theme.html) for a list of optional arguments. This is great for adding horizontal/vertical lines and other annotations to tell the story of your data.
+
+Now let's create a boxplot -- these are helpful for visualizing categorical variables.
+
+```{r}
+ggplot(data = mammal, aes(x = vore, y = sleep_rem)) +
+  geom_boxplot() +
+  labs(title = "REM Sleep Across Mammalian Diets", 
+       y = "REM Sleep (hrs)",
+       x = "-vore Classification")
+```
+
+Note that we didn't add a theme here -- this is the default appearance for plots using ggplot2.
+
+**Now play with ggplot2 and the other skills you've learned to create a plot that interests you.**
