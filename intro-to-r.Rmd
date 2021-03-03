@@ -151,9 +151,9 @@ mammal <- read_csv("data/mammal-sleep.csv")
 
 (This is the first time you're seeing the assignment operator `<-`. We'll use this a lot!)
 
-I created mammal-sleep.csv using the `write_csv()` function, as in `write_csv(msleep, "data/mammal-sleep.csv)`. You can use write_csv to save data you've modified/filtered/created.
+I created mammal-sleep.csv using the `write_csv()` function, as in `write_csv(msleep, "data/mammal-sleep.csv")`. You can use write_csv to save data you've modified/filtered/created.
 
-Other functions and packages exist for reading other types of data files (for example, the `readxlsx` package for loading Excel files or `read_table()` and `read_delim()`).
+Other functions and packages exist for reading other types of data files (for example, the `readxl` package for loading Excel files or `read_table()` and `read_delim()`).
 
 If you are unsure about what a function does or how to use it, type `?function-name-here` in the Console to populate the Help tab. Try `?read_csv`. Examples at the end of the help reference are often the most useful part for me.
 
@@ -217,14 +217,24 @@ Let's do some exploratory data analysis and look at summary statistics!
 You've learned the assignment operator, so it's time to introduce the piping operator `%>%`. This is used to pass the output of one line to the next, like in the example below.
 
 ```{r}
+mammal
+```
+
+```{r}
 mammal %>%
   filter(order == "Primates") %>%
   select(name, sleep_total) %>%
   arrange(desc(sleep_total)) %>%
   head(5)
+
+mammal %>%
+  filter(order == "Rodentia") %>%
+  select(name, sleep_total) %>%
+  arrange(desc(sleep_total)) %>%
+  head(5)
 ```
 
-**Try this on your own -- see if you can find the mammal of class Rodentia that spends the least time awake.**
+**Try this on your own -- see if you can find the mammal of order Rodentia that spends the least time awake.**
 
 R can make logical comparisons like the one in `filter()` above. Use `!=` to mean 'does not equal'. You can also use operators like `>` or `<=` to mean 'is greater than' and 'is less than or equal to'. Also `is.na()` and `!is.na()`. Remember to use `==` for equality, not `=`. Use `|` as "or" and `&` as "and" for multiple conditions. (Also `%in%`!)
 
