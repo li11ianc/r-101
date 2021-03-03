@@ -289,6 +289,14 @@ mammal <- mammal %>%
   ))
 ```
 
+Example code, if there were character strings "NA" you needed to change to missing in the data:
+mammal <- mammal %>%
+  mutate(total_sleep = case_when(
+    total_sleep == "NA" ~ as.numeric(NA),
+    TRUE ~ total_sleep
+  ))
+
+
 Every value of a variable must be of the same type (i.e. character, numeric, integer, etc.) -- be careful to only create values of the same type when using `case_when()` otherwise your mutate won't work (especially with NA values). `as.numeric()`, `as.character()`, `as.integer()` are useful functions to coerce NA values (and others) to your desired variable type.
 
 ### Exercise 5
