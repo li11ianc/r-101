@@ -279,6 +279,11 @@ mammal <- mammal %>%
 
 **On your own, create a variable containing the number of sleep cycles the animals experience each night (hint: divide the total amount of sleep by the length of the sleep cycle). Round to one decimal place and call the new variable `num_cycles`**
 
+```{r}
+mammal <- mammal %>%
+  mutate(num_cycles = round(sleep_total / sleep_cycle, 1))
+```
+
 A syntax tip for case_when: use `TRUE ~ orig_variable_name` as a kind of "else" or "in all other cases". So we could also use the following code to create `sleepy`.
 
 ```{r}
@@ -329,10 +334,10 @@ You can find a great ggplot2 cheatsheet [here.](https://rstudio.com/wp-content/u
 
 Let's create a plot to look at how total sleep and REM sleep are related.
 
-```{r}
-ggplot(data = mammal, mapping = aes(x = sleep_total, y = sleep_rem, color = sleepy)) +
+```{r message=FALSE, warning = FALSE}
+ggplot(data = mammal, mapping = aes(x = sleep_total, y = sleep_rem, color = vore)) +
   geom_point() +
-  theme_light() +
+  theme_light()+
   labs(title = "REM Sleep vs. Total Sleep in Mammals",
        subtitle = "from msleep, a dataset of the ggplot2 package",
        x = "Total Sleep (hrs)",
@@ -381,7 +386,7 @@ name_of_function <- function(input1=DEFAULT_VALUE, input2) {
 Let's define a function to say hello.
 
 ```{r}
-say_hello <- function(lastname, firstname) {
+say_hello <- function(lastname, firstname="Bob") {
   print(paste0("Hello ", firstname, " ", lastname, "!"))
 }
 ```
@@ -393,6 +398,10 @@ Let's try writing a function to convert hours to minutes (this is something we c
 ```{r}
 function_name <- function(x) {
   return()
+}
+
+convert_hours_to_minutes <- function(time) {
+  return(time*60)
 }
 ```
 
