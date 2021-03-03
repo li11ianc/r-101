@@ -92,7 +92,7 @@ Next, click the "Push" button in your Git panel in RStudio. RStudio may ask you 
 ```{r chunk-label}
 # This is a comment and won't actually run -- it helps make your code readable and organized
 #### You can also comment out code that you don't want to run (anything on a line that DOESN'T begin with # will run)
-date <- 03032021
+date <- "03/03/2021"
 print("This is a code chunk!")
 ```
 
@@ -151,7 +151,7 @@ mammal <- read_csv("data/mammal-sleep.csv")
 
 (This is the first time you're seeing the assignment operator `<-`. We'll use this a lot!)
 
-I created mammal-sleep.csv using the `write_csv()` function, as in `write_csv(msleep, "data/mammal-sleep.csv)`.
+I created mammal-sleep.csv using the `write_csv()` function, as in `write_csv(msleep, "data/mammal-sleep.csv)`. You can use write_csv to save data you've modified/filtered/created.
 
 Other functions and packages exist for reading other types of data files (for example, the `readxlsx` package for loading Excel files or `read_table()` and `read_delim()`).
 
@@ -269,6 +269,18 @@ mammal <- mammal %>%
 
 **On your own, create a variable containing the number of sleep cycles the animals experience each night (hint: divide the total amount of sleep by the length of the sleep cycle). Round to one decimal place and call the new variable `num_cycles`**
 
+A syntax tip for case_when: use `TRUE ~ orig_variable_name` as a kind of "else" or "in all other cases". So we could also use the following code to create `sleepy`.
+
+```{r}
+mammal <- mammal %>%
+  mutate(sleepy = case_when(
+    sleep_total > awake ~ TRUE,
+    TRUE ~ FALSE
+  ))
+```
+
+Every value of a variable must be of the same type (i.e. character, numeric, integer, etc.) -- be careful to only create values of the same type when using `case_when()` otherwise your mutate won't work (especially with NA values). `as.numeric()`, `as.character()`, `as.integer()` are useful functions to coerce NA values (and others) to your desired variable type.
+
 ### Exercise 5
 
 `group_by()` can be very helpful if you want to answer questions about specific groups or categories of observations in the data. 
@@ -297,19 +309,44 @@ mammal %>%
 
 You can find a great ggplot2 cheatsheet [here.](https://rstudio.com/wp-content/uploads/2016/11/ggplot2-cheatsheet-2.1.pdf)
 
-```{r}
+Let's create a plot to look at how total sleep and REM sleep are related.
 
+```{r}
+ggplot(data = mammal, mapping = aes(x = sleep_total, y = sleep_rem, color = sleepy)) +
+  geom_point() +
+  theme_light() +
+  labs(title = "REM Sleep vs. Total Sleep in Mammals",
+       subtitle = "from msleep, a dataset of the ggplot2 package",
+       x = "Total Sleep (hrs)",
+       y = "REM Sleep (hrs)", 
+       color = "More Time Asleep than Awake")
 ```
 
-ggplot(data=bikeshare, mapping=aes(x=count)) + 
-  geom_histogram() +
-  labs(title="______", x="______")
+You may need to filter out NAs before plotting -- R does it automatically here.
 
-add option color = in the geom_histogram argument (or in aes!) now try fill=
-may need to filter NAs!!!
+- data is always the first argument (can go over piping operator exception) 
+- within `aes()` (short for aesthetics), assign variables to the x/y axes and other elements of the plot 
+- use another layer to specify the kind of plot -- `geom_point()`, `geom_histogram()`, and `geom_boxplot()` are a few common examples
+- add a theme to manipulate the appearance of your plot -- `theme_light()` and `theme_classic()` are two of many options
+- use `labs()` to add labels
+- tip: use `alpha()` for transparency on crowded scatterplots
 
+Notes on `theme()`:
+You can build highly cutomized plots by formatting the non-data elements with arguments within `theme()`. See [this link](https://ggplot2.tidyverse.org/reference/theme.html) for a list of optional arguments. This is great for adding horizontal/vertical lines and other annotations to tell the story of your data.
 
+Now let's create a boxplot -- these are helpful for visualizing categorical variables.
 
+```{r}
+ggplot(data = mammal, aes(x = vore, y = sleep_rem)) +
+  geom_boxplot() +
+  labs(title = "REM Sleep Across Mammalian Diets", 
+       y = "REM Sleep (hrs)",
+       x = "-vore Classification")
+```
+
+Note that we didn't add a theme here -- this is the default appearance for plots using ggplot2.
+
+**Now play with ggplot2 and the other skills you've learned to create a plot that interests you.**
 
 ## Prep for Shiny Apps
 
@@ -320,7 +357,7 @@ You can use HTML in R for prettier formatting! CSS will also take your Shiny App
 In R, we define functions with this format:
 
 name_of_function <- function(input1=DEFAULT_VALUE, input2) {
-    what the function does will do in here!!
+    what the function does will go in here!!
 }
 
 Let's define a function to say hello.
@@ -333,30 +370,50 @@ say_hello <- function(lastname, firstname) {
 
 `paste()` and `paste0()` can be used to concatenate strings and expressions: the former inserts a space between arguments and the latter does not.
 
+Let's try writing a function to convert hours to minutes (this is something we could use on the time variables in our mammal data if we wanted).
+
+```{r}
+function_name <- function(x) {
+  return()
+}
+```
+
+When you find yourself writing the same code over and over again, it's a good time to think about writing a function.
+
 ### Conditionals: if, else if, and else
-
-
-
+ 
 Nested conditionals example structure:
 
 if (condition_one) {
+
   ##
+  
   ## code
+  
   ##
+  
 } else if (condition_two) {
   ##
+  
   ## code
+  
   ##
+  
 } else {
-  ##
-  ## code
-  ##
-}
 
+  ##
+  
+  ## code
+  
+  ##
+  
+}
 
 ## Troubleshooting
 
 If the code in your Rmd won't knit or won't run in your console, take a look at the warning message R spits out. Usually I think these are pretty cryptic and useless, but try copying and searching the error message you get online. Odds are somebody's already posted about it on Stack Exchange.
+
+Learn by doing! Slogging through warning message after warning message will make you better at this.
 
 ## To learn more
 
@@ -368,4 +425,4 @@ Topics I'm happy to introduce if we have extra time and folks are interested: `s
 ## References
 
 https://rmarkdown.rstudio.com/lesson-3.html
-
+Maria Tackett's STA 199 & 210, Shawn Santo's STA 323
