@@ -1,0 +1,14 @@
+---
+title: "Practice Exercises"
+author: "Lillian Clark"
+date: "3/2/2021"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+```
+
+### Exercise 1
+
